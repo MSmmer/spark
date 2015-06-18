@@ -62,7 +62,9 @@ $ PYSPARK_DRIVER_PYTHON=ipython ./bin/pyspark
 $ PYSPARK_DRIVER_PYTHON=ipython PYSPARK_DRIVER_PYTHON_OPTS="notebook --pylab inline" ./bin/pyspark
 ```
 ###弹性分布式数据集（RDD）
-Spark是以RDD概念为中心运行的。RDD是一个容错的、可以被并行操作的元素集合。创建一个RDD有两个方法：在你的驱动程序中并行化一个已经存在的集合；从外部存储系统中引用一个数据集，这个存储系统可以是一个共享文件系统，比如HDFS、HBase或任意提供了Hadoop输入格式的数据来源。
+Spark是以RDD概念为中心运行的。RDD是一个容错的、可以被并行操作的元素集合。
+
+创建一个RDD有两个方法：在你的驱动程序中并行化一个已经存在的集合；从外部存储系统中引用一个数据集，这个存储系统可以是一个共享文件系统，比如HDFS、HBase或任意提供了Hadoop输入格式的数据来源。
 
 并行化集合
 
@@ -78,6 +80,20 @@ distData = sc.parallelize(data)
 并行集合的一个重要参数是将数据集划分成分片的数量。对每一个分片，Spark会在集群中运行一个对应的任务。典型情况下，集群中的每一个CPU将对应运行2-4个分片。一般情况下，Spark会根据当前集群的情况自行设定分片数量。但是，你也可以通过将第二个参数传递给parallelize方法(比如sc.parallelize(data, 10))来手动确定分片数量。
 
 注意：有些代码中会使用切片（slice，分片的同义词）这个术语来保持向下兼容性。
+
+举例：从普通数组创建RDD，里面包含了1到9这9个数字，它们分别在3个分区中。
+
+```
+scala> val a = sc.parallelize(1 to 9, 3)
+a: org.apache.spark.rdd.RDD[Int] = ParallelCollectionRDD[1] at parallelize at <console>:12
+```
+举例：读取文件README.md来创建RDD，文件中的每一行就是RDD中的一个元素
+
+```
+scala> val b = sc.textFile("README.md")
+b: org.apache.spark.rdd.RDD[String] = MappedRDD[3] at textFile at <console>:12
+```
+虽然还有别的方式可以创建RDD，但在本文中我们主要使用上述两种方式来创建RDD以说明RDD的API。
 ###外部数据集
 PySpark可以通过Hadoop支持的外部数据源（包括本地文件系统、HDFS、 Cassandra、HBase、亚马逊S3等等）建立分布数据集。Spark支持文本文件、序列文件以及其他任何Hadoop输入格式文件。
 
@@ -418,24 +434,6 @@ lineLengths.persist()
 ```
 这条代码将使得lineLengths在第一次计算生成之后保存在内存中。
 
-
-###如何创建RDD？
-
-RDD可以从普通数组创建出来，也可以从文件系统或者HDFS中的文件创建出来。
-
-举例：从普通数组创建RDD，里面包含了1到9这9个数字，它们分别在3个分区中。
-
-```
-scala> val a = sc.parallelize(1 to 9, 3)
-a: org.apache.spark.rdd.RDD[Int] = ParallelCollectionRDD[1] at parallelize at <console>:12
-```
-举例：读取文件README.md来创建RDD，文件中的每一行就是RDD中的一个元素
-
-```
-scala> val b = sc.textFile("README.md")
-b: org.apache.spark.rdd.RDD[String] = MappedRDD[3] at textFile at <console>:12
-```
-虽然还有别的方式可以创建RDD，但在本文中我们主要使用上述两种方式来创建RDD以说明RDD的API。
 
 ###map
 
